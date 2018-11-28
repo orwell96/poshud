@@ -12,6 +12,7 @@
 --settings
 
 colour = 0xFFFFFF  --text colour in hex format default is white
+enable_star = true
 
 
 --------------------------------------------------------------------------------
@@ -72,6 +73,9 @@ local function get_time()
 	return ("%02d:%02d"):format(h, m);
 end
 
+-- rotating star
+local star={"\\", "|", "/", "-"}
+
 
 -- Lag counters
 -- adaption weights for averages
@@ -84,6 +88,8 @@ local h_text = "Initializing..."
 local h_int = 2
 local h_tmr = 0
 
+local starc = 0
+
 minetest.register_globalstep(function (dtime)
 	-- make a lag sample
 	l_avg1 = w_avg1*dtime  + ow_avg1*l_avg1
@@ -95,7 +101,14 @@ minetest.register_globalstep(function (dtime)
 		-- Update hud text that is the same for all players
 		local s_lag = string.format("Lag: avg: %.2f (%.2f) max: %.2f", l_avg1, l_avg2, l_max)
 		local s_time = "Time: "..get_time()
-		h_text = s_time .. "\n" .. s_lag
+		
+		local s_star = ""
+		if enable_star then
+			s_star = star[starc+1]
+			starc = (starc + 1) % 4
+		end
+		
+		h_text = s_time .. "   " .. s_star .. "\n" .. s_lag
 		
 		h_tmr = h_int
 	else
