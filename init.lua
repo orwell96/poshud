@@ -23,10 +23,21 @@ enable_star = true
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
+
+-- hud id map (playername -> hud-id)
 local player_hud = {}
+
+-- hud enabled map (playername -> bool)
+local player_hud_enabled = {}
 
 local function generatehud(player)
 	local name = player:get_player_name()
+
+	if player_hud[name] then
+		-- already set up
+		return
+	end
+
 	local hud = {}
 	hud.id = player:hud_add({
 		hud_elem_type = "text",
@@ -40,8 +51,15 @@ local function generatehud(player)
 	})
 	player_hud[name] = hud
 end
+
 local function updatehud(player, text)
 	local name = player:get_player_name()
+
+	if not player_hud_enabled[name] then
+		-- check if the player enabled the hud
+		return
+	end
+
 	if not player_hud[name] then
 		generatehud(player)
 	end
@@ -51,19 +69,49 @@ local function updatehud(player, text)
 		hud.text = text
 	end
 end
+
 local function removehud(player)
 	local name = player:get_player_name()
 	if player_hud[name] then
 		player:hud_remove(player_hud[name].id)
+		player_hud[name] = nil
 	end
 end
-minetest.register_on_joinplayer(function(player)
-	minetest.after(0,generatehud,player)
-end)
+
 minetest.register_on_leaveplayer(function(player)
-		minetest.after(1,removehud,player)
+	minetest.after(1,removehud,player)
 end)
 
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- hud enabled/disable
+
+
+minetest.register_chatcommand("poshud", {
+	params = "on|off",
+	description = "Turn poshud on or off",
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+
+		if param == "on" then
+			player_hud_enabled[name] = true
+			generatehud(player)
+
+		elseif param == "off" then
+			player_hud_enabled[name] = false
+			removehud(player)
+
+		else
+			return true, "Usage: poshud [on|off]"
+
+		end
+	end
+})
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- time
 -- from https://gitlab.com/Rochambeau/mthudclock/blob/master/init.lua
 
