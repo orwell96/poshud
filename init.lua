@@ -9,6 +9,12 @@
 ----------------Zeno` simplified some math and additional tweaks ---------------
 --------------------------------------------------------------------------------
 
+poshud = {
+	-- Position of hud
+	posx = tonumber(minetest.settings:get("poshud.hud.offsetx") or 0.8),
+	posy = tonumber(minetest.settings:get("poshud.hud.offsety") or 0.95)
+}
+
 --settings
 
 colour = 0xFFFFFF  --text colour in hex format default is white
@@ -25,7 +31,7 @@ local function generatehud(player)
 	hud.id = player:hud_add({
 		hud_elem_type = "text",
 		name = "poshud",
-		position = {x=0.80, y=0.95},
+		position = {x=poshud.posx, y=poshud.posy},
 		offset = {x=8, y=-8},
 		text = "Initializing...",
 		scale = {x=100,y=100},
