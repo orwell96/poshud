@@ -172,6 +172,10 @@ minetest.register_globalstep(function (dtime)
 	for _,player in ipairs(minetest.get_connected_players()) do
 		local posi = player:get_pos()
 		local posistr = math.floor(posi.x+0.5).." "..math.floor(posi.y+0.5).." "..math.floor(posi.z+0.5)
-		updatehud(player, h_text.."\nPos: "..posistr)
+		local mapblockstr = math.floor(posi.x / 16) .. " "
+			.. math.floor(posi.y / 16) .. " "
+			.. math.floor(posi.z / 16)
+
+		updatehud(player, h_text .. "\nPos: " .. posistr .. "\nMapblock: " .. mapblockstr)
 	end
 end);
