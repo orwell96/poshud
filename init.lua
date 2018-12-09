@@ -12,7 +12,8 @@
 poshud = {
 	-- Position of hud
 	posx = tonumber(minetest.settings:get("poshud.hud.offsetx") or 0.8),
-	posy = tonumber(minetest.settings:get("poshud.hud.offsety") or 0.95)
+	posy = tonumber(minetest.settings:get("poshud.hud.offsety") or 0.95),
+	enable_mapblock = minetest.settings:get_bool("poshud.mapblock.enable")
 }
 
 --settings
@@ -175,10 +176,20 @@ minetest.register_globalstep(function (dtime)
 		local y = math.floor(posi.y+0.5)
 		local z = math.floor(posi.z+0.5)
 		local posistr = x.." ".. y .." ".. z
-		local mapblockstr = math.floor(x / 16) .. " "
-			.. math.floor(y / 16) .. " "
-			.. math.floor(z / 16)
 
-		updatehud(player, h_text .. "\nPos: " .. posistr .. "\nMapblock: " .. mapblockstr)
+		-- resulting hud string
+		local hud_display = h_text .. "\nPos: " .. posistr
+
+		if poshud.enable_mapblock then
+			-- append if enabled
+			local mapblockstr = math.floor(x / 16) .. " "
+				.. math.floor(y / 16) .. " "
+				.. math.floor(z / 16)
+
+
+			hud_display = hud_display .. "\nMapblock: " .. mapblockstr
+		end
+
+		updatehud(player,  hud_display)
 	end
 end);
