@@ -131,43 +131,75 @@ end
 -- rotating star
 local star={"\\", "|", "/", "-"}
 
+-- New lagometry algorithm:
+-- Make a list of N samples
+-- Every sample is time from last step, therefore "lag"
+-- Since time distance between samples is not equal, every sample needs
+-- to be weighted by... time, which is itself. This results in:
+-- avg_lag = sum(xi^2) / sum(xi)
+-- Results of sums are cached for performance (subtract old sample, add new sample)
 
--- Lag counters
--- adaption weights for averages
-local w_avg1, w_avg2 = 0.001, 0.001
-local dec_max = 0.99995
+local l_time = 0
+local l_N = 2048
+local l_samples = {}
+local l_ctr = 0
+local l_sumsq = 0
+local l_sum = 0
+local l_max = 0.1
 
-local ow_avg1, ow_avg2 = 1-w_avg1, 1-w_avg2
-local l_avg1, l_avg2, l_max = 0.1, 0.1, 0.1
+
 local h_text = "Initializing..."
 local h_int = 2
 local h_tmr = 0
 
-local starc = 0
-
 minetest.register_globalstep(function (dtime)
 	-- make a lag sample
-	l_avg1 = w_avg1*dtime  + ow_avg1*l_avg1
-	l_avg2 = w_avg2*l_avg1 + ow_avg2*l_avg2
-	l_max = math.max(l_max*dec_max, dtime)
+	
+	local news = os.clock() - l_time
+	if l_time == 0 then
+		news = 0.1
+	end
+	l_time = os.clock()
+	
+	local olds = l_samples[l_ctr+1] or 0
+	l_sumsq = l_sumsq - olds*olds + news*news
+	l_sum = l_sum - olds + news
+	
+	l_samples[l_ctr+1] = news
+	l_max = math.max(l_max, news)
+	
+	l_ctr = (l_ctr + 1) % l_N
+	
+	if l_ctr == 0 then
+		-- recalculate from scratch
+		l_sumsq = 0
+		l_sum = 0
+		l_max = 0
+		for i=1,l_N do
+			local sample = l_samples[i]
+			l_sumsq = l_sumsq + sample*sample
+			l_sum = l_sum + sample
+			l_max = math.max(l_max, sample)
+		end
+	end
 	
 	-- update hud text when necessary
 	if h_tmr <= 0 then
+		local l_avg = l_sumsq / l_sum
 		-- Update hud text that is the same for all players
-		local s_lag = string.format("Lag: avg: %.2f (%.2f) max: %.2f", l_avg1, l_avg2, l_max)
+		local s_lag = string.format("Lag: avg: %.2f peak: %.2f", l_avg, l_max)
 		local s_time = "Time: "..get_time()
 		
 		local s_star = ""
 		if enable_star then
-			s_star = star[starc+1]
-			starc = (starc + 1) % 4
+			s_star = star[(l_ctr % 4)+1]
 		end
 		
 		h_text = s_time .. "   " .. s_star .. "\n" .. s_lag
 		
 		h_tmr = h_int
 	else
-		h_tmr = h_tmr - dtime
+		h_tmr = h_tmr - news
 	end
 	
 	for _,player in ipairs(minetest.get_connected_players()) do
