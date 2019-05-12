@@ -56,7 +56,7 @@ end
 local function updatehud(player, text)
 	local name = player:get_player_name()
 
-	if not player_hud_enabled[name] then
+	if player_hud_enabled[name]==false then
 		-- check if the player enabled the hud
 		return
 	end
@@ -187,7 +187,7 @@ minetest.register_globalstep(function (dtime)
 	if h_tmr <= 0 then
 		local l_avg = l_sumsq / l_sum
 		-- Update hud text that is the same for all players
-		local s_lag = string.format("Lag: avg: %.2f peak: %.2f", l_avg, l_max)
+		local s_lag = string.format("Lag: %.2f avg: %.2f peak: %.2f", news, l_avg, l_max)
 		local s_time = "Time: "..get_time()
 		
 		local s_star = ""
