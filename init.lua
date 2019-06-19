@@ -152,6 +152,8 @@ local h_text = "Initializing..."
 local h_int = 2
 local h_tmr = 0
 
+local starc = 0
+
 minetest.register_globalstep(function (dtime)
 	-- make a lag sample
 	
@@ -190,12 +192,18 @@ minetest.register_globalstep(function (dtime)
 		local s_lag = string.format("Lag: %.2f avg: %.2f peak: %.2f", news, l_avg, l_max)
 		local s_time = "Time: "..get_time()
 		
-		local s_star = ""
-		if enable_star then
-			s_star = star[(l_ctr % 4)+1]
+		local s_rwt = ""
+		if advtrains.lines and advtrains.lines.rwt then
+			s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
 		end
 		
-		h_text = s_time .. "   " .. s_star .. "\n" .. s_lag
+		local s_star = ""
+		if enable_star then
+			s_star = star[starc+1]
+            starc = (starc + 1) % 4
+		end
+		
+		h_text = s_time .. "   " .. s_star .. s_rwt .. "\n" .. s_lag
 		
 		h_tmr = h_int
 	else
