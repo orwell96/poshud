@@ -193,7 +193,7 @@ minetest.register_globalstep(function (dtime)
 		local s_time = "Time: "..get_time()
 		
 		local s_rwt = ""
-		if advtrains.lines and advtrains.lines.rwt then
+		if advtrains and advtrains.lines and advtrains.lines.rwt then
 			s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
 		end
 		
