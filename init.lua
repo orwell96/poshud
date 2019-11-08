@@ -79,10 +79,16 @@ local function removehud(player)
 	end
 end
 
-minetest.register_on_leaveplayer(function(player)
-	minetest.after(1,removehud,player)
-end)
+local function removecache(name)
+	if player_hud[name] then
+		player_hud[name] = nil
+	end
+end
 
+minetest.register_on_leaveplayer(function(player)
+	local name = player:get_player_name()
+	minetest.after(1, removecache, name)
+end)
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
